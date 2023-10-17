@@ -99,7 +99,6 @@ function AesFileEncryptorPage() {
             aesKey,
             aesIv
           );
-          console.log(encrypted);
           saveOrOpenBlob(new Blob([encrypted]), inputFile.name || "encrypted");
         }catch(err){
           alert('Encryption failed')

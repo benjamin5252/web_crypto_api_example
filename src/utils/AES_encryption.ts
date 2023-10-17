@@ -1,8 +1,10 @@
 
 
-const _uint8ArrayfromHexString = (hexString: string) => Uint8Array.from(hexString.match(/.{1,2}/g).map((byte: any) => parseInt(byte, 16)));
 
-
+const _arrayBufferFromHexString = (hexString: string) => {
+  const bytes = Uint8Array.from(hexString.match(/.{1,2}/g).map((byte: any) => parseInt(byte, 16)));
+  return bytes.buffer;
+}
 
 
 const _stringToArrayBuffer = (str: string)=>{
@@ -33,12 +35,16 @@ export const getKeyFromPassphrase = async (passphrase: string) => {
   return keyHex
 }
 
-
+export const getIvFromPassphrase = async (passphrase: string) => {
+  const keyHex = await getKeyFromPassphrase(passphrase); 
+  const ivHex = keyHex.substring(0, 32)
+  return ivHex
+}
 
 
 export const encryptAes = async (fileArrayBuffer: ArrayBuffer, keyHex: string, ivHex: string) => {
-  const ivArrayBuffer = _uint8ArrayfromHexString(ivHex).buffer;
-  const keyArrayBuffer = _uint8ArrayfromHexString(keyHex).buffer;
+  const ivArrayBuffer = _arrayBufferFromHexString(ivHex);
+  const keyArrayBuffer = _arrayBufferFromHexString(keyHex);
 
   // prepare the secret key for encryption
   const secretKey = await crypto.subtle.importKey('raw', keyArrayBuffer, {
@@ -59,8 +65,8 @@ export const encryptAes = async (fileArrayBuffer: ArrayBuffer, keyHex: string, i
 // openssl enc -aes-256-cbc -nosalt -d -in test_car_encrypted_web.jpg -out test_car_enc_web_dec_openssl.jpg -K <key in Hex> -iv <iv in Hex>
 export const decryptAes = async (fileArrayBuffer: ArrayBuffer, keyHex: string, ivHex: string) => {
   // decode the base64-encoded ciphertext and IV
-  const ivArrayBuffer = _uint8ArrayfromHexString(ivHex).buffer;
-  const keyArrayBuffer = _uint8ArrayfromHexString(keyHex).buffer;
+  const ivArrayBuffer = _arrayBufferFromHexString(ivHex);
+  const keyArrayBuffer = _arrayBufferFromHexString(keyHex);
 
   // prepare the secret key for encryption
   const secretKey = await crypto.subtle.importKey('raw', keyArrayBuffer, {
@@ -81,13 +87,7 @@ export const decryptAes = async (fileArrayBuffer: ArrayBuffer, keyHex: string, i
   return decryptedBuffer;
 }
 
-export const getIvFromPassphrase = async (passphrase: string) => {
-  const key = await _digestMessage(passphrase)
-  // convert ArrayBuffer to hex string
-  const keyHex = Array.from(new Uint8Array(key)).map(b => b.toString(16).padStart(2, '0')).join(''); 
-  const ivHex = keyHex.substring(0, 32)
-  return ivHex
-}
+
 
 
 
