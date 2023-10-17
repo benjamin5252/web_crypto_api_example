@@ -53,12 +53,6 @@ export const decryptAes = async (fileArrayBuffer: ArrayBuffer, keyHex: string, i
   return decryptedBuffer;
 }
 
-export const getKeyFromPassphrase = async (passphrase: string) => {
-  const key = await digestMessage(passphrase)
-  const keyHex = Array.from(new Uint8Array(key)).map(b => b.toString(16).padStart(2, '0')).join('');
-  return keyHex
-}
-
 export const getIvFromPassphrase = async (passphrase: string) => {
   const key = await digestMessage(passphrase)
   const keyHex = Array.from(new Uint8Array(key)).map(b => b.toString(16).padStart(2, '0')).join('');
@@ -66,7 +60,13 @@ export const getIvFromPassphrase = async (passphrase: string) => {
   return ivHex
 }
 
-async function digestMessage(message: string) {
+export const getKeyFromPassphrase = async (passphrase: string) => {
+  const key = await digestMessage(passphrase)
+  const keyHex = Array.from(new Uint8Array(key)).map(b => b.toString(16).padStart(2, '0')).join('');
+  return keyHex
+}
+
+const digestMessage = async (message: string) => {
   const encoder = new TextEncoder();
   const data = encoder.encode(message);
   const hash = await crypto.subtle.digest("SHA-256", data);
