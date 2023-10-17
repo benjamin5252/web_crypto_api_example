@@ -4,6 +4,28 @@ const uint8ArrayfromHexString = (hexString: string) =>Uint8Array.from(hexString.
 
 
 
+
+const _stringToArrayBuffer = (str: string)=>{
+  const encoder = new TextEncoder();
+  return encoder.encode(str).buffer;
+}
+
+const _digestMessage = async (message: string) => {
+  const data = _stringToArrayBuffer(message);
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  return hash;
+}
+
+export const getKeyFromPassphrase = async (passphrase: string) => {
+  const key = await _digestMessage(passphrase)
+  // convert ArrayBuffer to hex string
+  const keyHex = Array.from(new Uint8Array(key)).map(b => b.toString(16).padStart(2, '0')).join('');
+  return keyHex
+}
+
+
+
+
 export const encryptAes = async (fileArrayBuffer: ArrayBuffer, keyHex: string, ivHex: string) => {
   const ivArrayBuffer = uint8ArrayfromHexString(ivHex).buffer;
   const keyArrayBuffer = uint8ArrayfromHexString(keyHex).buffer;
@@ -54,24 +76,14 @@ export const decryptAes = async (fileArrayBuffer: ArrayBuffer, keyHex: string, i
 }
 
 export const getIvFromPassphrase = async (passphrase: string) => {
-  const key = await digestMessage(passphrase)
-  const keyHex = Array.from(new Uint8Array(key)).map(b => b.toString(16).padStart(2, '0')).join('');
+  const key = await _digestMessage(passphrase)
+  // convert ArrayBuffer to hex string
+  const keyHex = Array.from(new Uint8Array(key)).map(b => b.toString(16).padStart(2, '0')).join(''); 
   const ivHex = keyHex.substring(0, 32)
   return ivHex
 }
 
-export const getKeyFromPassphrase = async (passphrase: string) => {
-  const key = await digestMessage(passphrase)
-  const keyHex = Array.from(new Uint8Array(key)).map(b => b.toString(16).padStart(2, '0')).join('');
-  return keyHex
-}
 
-const digestMessage = async (message: string) => {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(message);
-  const hash = await crypto.subtle.digest("SHA-256", data);
-  return hash;
-}
 
 
 
