@@ -1,0 +1,282 @@
+variables:
+  AM_FRONTEND_SERVER_1: "44.242.63.9"
+  AM_FRONTEND_SERVER_2: "35.80.147.153"
+  WEB_PATH: "/var/www/html/tool_encryption"
+  WEB_TEST_PATH: "/var/www/html/tool_encryption"
+  LARADOCK_PATH: "/var/www/laradock"
+  RELEASE_PATH: "/var/www/html/tool_encryption"
+  RELEASE_TEST_PATH: "/var/www/html/tool_encryption"
+
+stages:
+  - deployServer
+
+before_script:
+  - echo "=====[ Deploy Start ]====="
+  - mkdir -p ~/.ssh
+  - echo -e "$ALL_END_PEM" > ~/.ssh/id_rsa.pem
+  - chown gitlab-runner:gitlab-runner ~/.ssh/id_rsa.pem
+  - chmod 600 ~/.ssh/id_rsa.pem
+  - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no \n\n" > ~/.ssh/config'
+
+after_script:
+  - echo "=====[ Deploy Finish ]====="
+
+deployServer1ByPrd:
+  stage: deployServer
+  only:
+    - main
+  script:
+    - echo "=====[ Deploy to prd ]====="
+    - echo "=====[ Deploy to AM Frontend Server 1 ]====="
+    - echo "=====[ Scp releases ]====="
+    - mv dist dist_new
+    - scp -i ~/.ssh/id_rsa.pem -r dist_new ubuntu@$AM_FRONTEND_SERVER_1:$RELEASE_PATH
+    - echo "=====[ Remove old releases ]====="
+    - >
+      ssh -i ~/.ssh/id_rsa.pem ubuntu@$AM_FRONTEND_SERVER_1
+      "
+      cd $RELEASE_PATH &&
+      sudo rm -rf dist &&
+      sudo mv dist_new dist
+      "
+
+
+# deployServer2ByPrd:
+#   stage: deployServer
+#   only:
+#     - main
+#   script:
+#     - echo "=====[ Deploy to AM Frontend Server 2 ]====="
+#     - echo "=====[ Scp releases ]====="
+#     - mv dist dist_new
+#     - scp -i ~/.ssh/id_rsa.pem -r dist_new ubuntu@$AM_FRONTEND_SERVER_2:$RELEASE_PATH
+#     - echo "=====[ Remove old releases ]====="
+#     - >
+#       ssh -i ~/.ssh/id_rsa.pem ubuntu@$AM_FRONTEND_SERVER_2
+#       "
+#       cd $RELEASE_PATH &&
+#       sudo rm -rf dist &&
+#       sudo mv dist_new dist
+#       "
+
+
+deployServer1ByDev:
+  stage: deployServer
+  only:
+    - dev
+  script:
+    - echo "=====[ Deploy to dev ]====="
+    - echo "=====[ Deploy to AM Frontend Server 1 ]====="
+    - echo "=====[ Scp releases ]====="
+    - mv dist dist_new
+    - scp -i ~/.ssh/id_rsa.pem -r dist_new ubuntu@$AM_FRONTEND_SERVER_1:$RELEASE_TEST_PATH
+    - echo "=====[ Remove old releases ]====="
+    - >
+      ssh -i ~/.ssh/id_rsa.pem ubuntu@$AM_FRONTEND_SERVER_1
+      "
+      cd $RELEASE_TEST_PATH &&
+      sudo rm -rf dist &&
+      sudo mv dist_new dist
+      "
+
+# deployServer2ByDev:
+#   stage: deployServer
+#   only:
+#     - dev
+#   script:
+#     - echo "=====[ Deploy to AM Frontend Server 2 ]====="
+#     - echo "=====[ Scp releases ]====="
+#     - mv dist dist_new
+#     - scp -i ~/.ssh/id_rsa.pem -r dist_new ubuntu@$AM_FRONTEND_SERVER_2:$RELEASE_TEST_PATH
+#     - echo "=====[ Remove old releases ]====="
+#     - >
+#       ssh -i ~/.ssh/id_rsa.pem ubuntu@$AM_FRONTEND_SERVER_2
+#       "
+#       cd $RELEASE_TEST_PATH &&
+#       sudo rm -rf dist &&
+#       sudo mv dist_new dist
+#       "
+
+
+
+
+# backup
+
+# deployServer1ByPrdOld:
+#   stage: deployServer
+#   only:
+#     - master
+#   script:
+#     - echo "=====[ Deploy to prd ]====="
+#     - echo "=====[ Deploy to AM Frontend Server 1 ]====="
+#     - >
+#       ssh -i ~/.ssh/id_rsa.pem ubuntu@$AM_FRONTEND_SERVER_1
+#       "
+#       cd $WEB_PATH &&
+#       sudo git reset --hard origin/master &&
+#       sudo git checkout master &&
+#       sudo git pull origin master &&
+#       sudo npm cache clean --force &&
+#       sudo rm -rf .nuxt &&
+#       sudo cp -rf releases_formal/formal/.nuxt .nuxt &&
+#       sudo rm -rf dist &&
+#       sudo cp -rf releases_formal/formal/dist dist &&
+#       sudo npm cache clean --force
+#       "
+
+# deployServer2ByPrdOld:
+#   stage: deployServer
+#   only:
+#     - master
+#   script:
+#     - echo "=====[ Deploy to AM Frontend Server 2 ]====="
+#     - >
+#       ssh -i ~/.ssh/id_rsa.pem ubuntu@$AM_FRONTEND_SERVER_2
+#       "
+#       cd $WEB_PATH &&
+#       sudo git reset --hard origin/master &&
+#       sudo git checkout master &&
+#       sudo git pull origin master &&
+#       sudo npm cache clean --force &&
+#       sudo rm -rf .nuxt &&
+#       sudo cp -rf releases_formal/formal/.nuxt .nuxt &&
+#       sudo rm -rf dist &&
+#       sudo cp -rf releases_formal/formal/dist dist &&
+#       sudo npm cache clean --force
+#       "
+
+# deployServer1ByDevOld:
+#   stage: deployServer
+#   only:
+#     - dev
+#   script:
+#     - echo "=====[ Deploy to dev ]====="
+#     - echo "=====[ Deploy to AM Frontend Server 1 ]====="
+#     - >
+#       ssh -i ~/.ssh/id_rsa.pem ubuntu@$AM_FRONTEND_SERVER_1
+#       "
+#       cd $WEB_TEST_PATH &&
+#       sudo git reset --hard origin/dev &&
+#       sudo git checkout dev &&
+#       sudo git pull origin dev &&
+#       sudo npm cache clean --force &&
+#       sudo rm -rf .nuxt &&
+#       sudo cp -rf releases_beta/beta/.nuxt .nuxt &&
+#       sudo rm -rf dist &&
+#       sudo cp -rf releases_beta/beta/dist dist &&
+#       sudo npm cache clean --force
+#       "
+
+# deployServer2ByDevOld:
+#   stage: deployServer
+#   only:
+#     - dev
+#   script:
+#     - echo "=====[ Deploy to AM Frontend Server 2 ]====="
+#     - >
+#       ssh -i ~/.ssh/id_rsa.pem ubuntu@$AM_FRONTEND_SERVER_2
+#       "
+#       cd $WEB_TEST_PATH &&
+#       sudo git reset --hard origin/dev &&
+#       sudo git checkout dev &&
+#       sudo git pull origin dev &&
+#       sudo npm cache clean --force &&
+#       sudo rm -rf .nuxt &&
+#       sudo cp -rf releases_beta/beta/.nuxt .nuxt &&
+#       sudo rm -rf dist &&
+#       sudo cp -rf releases_beta/beta/dist dist &&
+#       sudo npm cache clean --force
+#       "
+
+
+
+# original
+
+# variables:
+#   AM_FRONTEND_SERVER_1: "44.242.63.9"
+#   AM_FRONTEND_SERVER_2: "35.80.147.153"
+#   WEB_PATH: "/var/www/html/app_frontend"
+#   WEB_TEST_PATH: "/var/www/html/appbeta_frontend"
+#   LARADOCK_PATH: "/var/www/laradock"
+
+# stages:
+#   - deployServer
+
+# before_script:
+#   - echo "=====[ Deploy Start ]====="
+#   - mkdir -p ~/.ssh
+#   - echo -e "$ALL_END_PEM" > ~/.ssh/id_rsa.pem
+#   - chown gitlab-runner:gitlab-runner ~/.ssh/id_rsa.pem
+#   - chmod 600 ~/.ssh/id_rsa.pem
+#   - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no \n\n" > ~/.ssh/config'
+
+# after_script:
+#   - echo "=====[ Deploy Finish ]====="
+
+# deployServer1ByPrd:
+#   stage: deployServer
+#   only:
+#     - master
+#   script:
+#     - echo "=====[ Deploy to prd ]====="
+#     - echo "=====[ Deploy to AM Frontend Server 1 ]====="
+#     - >
+#       ssh -i ~/.ssh/id_rsa.pem ubuntu@$AM_FRONTEND_SERVER_1
+#       "
+#       cd $WEB_PATH &&
+#       sudo git reset --hard origin/master &&
+#       sudo git checkout master &&
+#       sudo git pull origin master &&
+#       sudo npm cache clean --force
+#       "
+
+# deployServer2ByPrd:
+#   stage: deployServer
+#   only:
+#     - master
+#   script:
+#     - echo "=====[ Deploy to AM Frontend Server 2 ]====="
+#     - >
+#       ssh -i ~/.ssh/id_rsa.pem ubuntu@$AM_FRONTEND_SERVER_2
+#       "
+#       cd $WEB_PATH &&
+#       sudo git reset --hard origin/master &&
+#       sudo git checkout master &&
+#       sudo git pull origin master &&
+#       sudo npm cache clean --force
+#       "
+
+# deployServer1ByDev:
+#   stage: deployServer
+#   only:
+#     - dev
+#   script:
+#     - echo "=====[ Deploy to dev ]====="
+#     - echo "=====[ Deploy to AM Frontend Server 1 ]====="
+#     - >
+#       ssh -i ~/.ssh/id_rsa.pem ubuntu@$AM_FRONTEND_SERVER_1
+#       "
+#       cd $WEB_TEST_PATH &&
+#       sudo git reset --hard origin/dev &&
+#       sudo git checkout dev &&
+#       sudo git pull origin dev &&
+#       sudo npm cache clean --force
+#       "
+
+# deployServer2ByDev:
+#   stage: deployServer
+#   only:
+#     - dev
+#   script:
+#     - echo "=====[ Deploy to AM Frontend Server 2 ]====="
+#     - >
+#       ssh -i ~/.ssh/id_rsa.pem ubuntu@$AM_FRONTEND_SERVER_2
+#       "
+#       cd $WEB_TEST_PATH &&
+#       sudo git reset --hard origin/dev &&
+#       sudo git checkout dev &&
+#       sudo git pull origin dev &&
+#       sudo npm cache clean --force
+#       "
+
+
