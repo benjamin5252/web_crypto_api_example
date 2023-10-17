@@ -167,7 +167,7 @@ const RsaStringEncryptPage = () => {
                   </div>
                   {encryptedString && (
                     <div className="break-all">
-                    <span className="font-bold">Encrypted Key (Base64): </span>{encryptedString}
+                    <span className="font-bold">Encrypted string (Base64): </span>{encryptedString}
                   </div>
                   )}
                   

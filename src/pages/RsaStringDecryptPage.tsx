@@ -173,7 +173,7 @@ const RsaStringDecryptPage = () => {
                   </div>
                   {decryptedString && (
                     <div className="break-all">
-                    <span className="font-bold">Decrypted Key: </span>{decryptedString}
+                    <span className="font-bold">Decrypted string: </span>{decryptedString}
                   </div>
                   )}
                   
