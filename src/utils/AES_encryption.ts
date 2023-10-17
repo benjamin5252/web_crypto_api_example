@@ -1,6 +1,6 @@
 
 
-const uint8ArrayfromHexString = (hexString: string) =>Uint8Array.from(hexString.match(/.{1,2}/g).map((byte: any) => parseInt(byte, 16)));
+const _uint8ArrayfromHexString = (hexString: string) => Uint8Array.from(hexString.match(/.{1,2}/g).map((byte: any) => parseInt(byte, 16)));
 
 
 
@@ -37,10 +37,8 @@ export const getKeyFromPassphrase = async (passphrase: string) => {
 
 
 export const encryptAes = async (fileArrayBuffer: ArrayBuffer, keyHex: string, ivHex: string) => {
-  const ivArrayBuffer = uint8ArrayfromHexString(ivHex).buffer;
-  const keyArrayBuffer = uint8ArrayfromHexString(keyHex).buffer;
-  
-  console.log('fileArrayBuffer', fileArrayBuffer)
+  const ivArrayBuffer = _uint8ArrayfromHexString(ivHex).buffer;
+  const keyArrayBuffer = _uint8ArrayfromHexString(keyHex).buffer;
 
   // prepare the secret key for encryption
   const secretKey = await crypto.subtle.importKey('raw', keyArrayBuffer, {
@@ -53,8 +51,6 @@ export const encryptAes = async (fileArrayBuffer: ArrayBuffer, keyHex: string, i
       name: 'AES-CBC',
       iv: ivArrayBuffer
   }, secretKey, fileArrayBuffer);
-  
-  console.log('ciphertextArrayBuffer', ciphertextArrayBuffer)
 
   return ciphertextArrayBuffer
 }
@@ -63,8 +59,8 @@ export const encryptAes = async (fileArrayBuffer: ArrayBuffer, keyHex: string, i
 // openssl enc -aes-256-cbc -nosalt -d -in test_car_encrypted_web.jpg -out test_car_enc_web_dec_openssl.jpg -K <key in Hex> -iv <iv in Hex>
 export const decryptAes = async (fileArrayBuffer: ArrayBuffer, keyHex: string, ivHex: string) => {
   // decode the base64-encoded ciphertext and IV
-  const ivArrayBuffer = uint8ArrayfromHexString(ivHex).buffer;
-  const keyArrayBuffer = uint8ArrayfromHexString(keyHex).buffer;
+  const ivArrayBuffer = _uint8ArrayfromHexString(ivHex).buffer;
+  const keyArrayBuffer = _uint8ArrayfromHexString(keyHex).buffer;
 
   // prepare the secret key for encryption
   const secretKey = await crypto.subtle.importKey('raw', keyArrayBuffer, {
