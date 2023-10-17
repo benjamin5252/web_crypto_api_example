@@ -16,10 +16,20 @@ const _digestMessage = async (message: string) => {
   return hash;
 }
 
+const _arrayBufferToHexString = (buffer: ArrayBuffer) => {
+  const byteArray = new Uint8Array(buffer);
+  const hexCodes = [...byteArray].map(value => {
+      const hexCode = value.toString(16);
+      const paddedHexCode = hexCode.padStart(2, '0');
+      return paddedHexCode;
+  });
+
+  return hexCodes.join('');
+}
+
 export const getKeyFromPassphrase = async (passphrase: string) => {
-  const key = await _digestMessage(passphrase)
-  // convert ArrayBuffer to hex string
-  const keyHex = Array.from(new Uint8Array(key)).map(b => b.toString(16).padStart(2, '0')).join('');
+  const key = await _digestMessage(passphrase);
+  const keyHex = _arrayBufferToHexString(key);
   return keyHex
 }
 
