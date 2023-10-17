@@ -133,7 +133,6 @@ function AesFileEncryptorPage() {
   const saveOrOpenBlob = (blob, fileName) => {
     const tempEl = document.createElement("a");
     document.body.appendChild(tempEl);
-    // tempEl.style    = "display: none";
     const url = window.URL.createObjectURL(blob);
     tempEl.href = url;
     tempEl.download = fileName;

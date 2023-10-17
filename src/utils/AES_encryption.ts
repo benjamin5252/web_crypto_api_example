@@ -43,6 +43,8 @@ export const getIvFromPassphrase = async (passphrase: string) => {
 
 
 export const encryptAes = async (fileArrayBuffer: ArrayBuffer, keyHex: string, ivHex: string) => {
+
+  // decode the Hex-encoded key and IV
   const ivArrayBuffer = _arrayBufferFromHexString(ivHex);
   const keyArrayBuffer = _arrayBufferFromHexString(keyHex);
 
@@ -64,7 +66,7 @@ export const encryptAes = async (fileArrayBuffer: ArrayBuffer, keyHex: string, i
 
 // openssl enc -aes-256-cbc -nosalt -d -in test_car_encrypted_web.jpg -out test_car_enc_web_dec_openssl.jpg -K <key in Hex> -iv <iv in Hex>
 export const decryptAes = async (fileArrayBuffer: ArrayBuffer, keyHex: string, ivHex: string) => {
-  // decode the base64-encoded ciphertext and IV
+  // decode the Hex-encoded key and IV
   const ivArrayBuffer = _arrayBufferFromHexString(ivHex);
   const keyArrayBuffer = _arrayBufferFromHexString(keyHex);
 
@@ -80,10 +82,7 @@ export const decryptAes = async (fileArrayBuffer: ArrayBuffer, keyHex: string, i
       iv: ivArrayBuffer
   }, secretKey, fileArrayBuffer);
 
-  // decode the decrypted plaintext
-  // const plaintext = new TextDecoder().decode(decryptedPlaintext);
-
-  // return the decrypted plaintext
+  // return the decrypted data as an ArrayBuffer
   return decryptedBuffer;
 }
 
